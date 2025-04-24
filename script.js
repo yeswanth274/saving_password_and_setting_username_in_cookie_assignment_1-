@@ -1,31 +1,25 @@
-document.addEventListener('DOMContentLoaded', function () {
-  // Function to get the value of a cookie by name
-  function getCookie(name) {
-    let cookieArray = document.cookie.split('; ');
-    let cookie = cookieArray.find((row) => row.startsWith(name + '='));
-    return cookie ? cookie.split('=')[1] : null;
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Ensure you load the .env variables
+
+const encrypt = (payload) => {
+  // Create a token from the payload
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+  return token;
+};
+
+const decrypt = (token) => {
+  try {
+    // Verify and decode the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Success:", decoded);
+    return decoded;
+  } catch (error) {
+    console.error("Invalid token:", error.message);
+    return null;
   }
+};
 
-  // Function to set a cookie
-  function setCookie(name, value, daysToExpire) {
-    let date = new Date();
-    date.setTime(date.getTime() + daysToExpire * 24 * 60 * 60 * 1000);
-    document.cookie =
-      name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
-  }
-
-  // 1. Get the value of the 'count' cookie
-  let count = parseInt(getCookie('count')) || 0;
-
-  // 2. Increment the value
-  count++;
-
-  // 3. Update the cookie with the new count
-  setCookie('count', count, 7); // Cookie expires in 7 days
-
-  // 4. Display the updated count on the webpage
-  const countDisplay = document.getElementById('countDisplay');
-  if (countDisplay) {
-    countDisplay.textContent = count;
-  }
-});
+module.exports = {
+  encrypt,
+  decrypt
+};
